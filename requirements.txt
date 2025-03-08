@@ -5,4 +5,3 @@ wordcloud
 spacy
 sastrawi
 whoosh
-https://github.com/explosion/spacy-models/releases/download/id_core_news_sm-3.3.0/id_core_news_sm-3.3.0.tar.gz
