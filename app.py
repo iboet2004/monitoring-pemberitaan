@@ -1,21 +1,14 @@
 import streamlit as st
 import re
-import spacy
+import nltk
+from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+
+# ✅ Download NLTK tokenizer (cuma pertama kali)
+nltk.download("punkt")
 
 st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
-
-# ✅ Pakai model universal yang sudah ada di Streamlit Cloud
-MODEL_NAME = "xx_ent_wiki_sm"
-
-# ✅ Load model tanpa install tambahan
-try:
-    nlp = spacy.load(MODEL_NAME)
-    spacy_status = f"✅ Model SpaCy {MODEL_NAME} berhasil dimuat!"
-except OSError:
-    nlp = None
-    spacy_status = f"❌ Model SpaCy {MODEL_NAME} tidak ditemukan!"
 
 # ✅ Inisialisasi stemmer Sastrawi
 factory = StemmerFactory()
@@ -28,19 +21,15 @@ def bersihkan_teks(teks):
     return teks
 
 def ekstrak_kata_kunci(teks):
-    """ Ekstraksi kata kunci menggunakan tokenisasi SpaCy + stemming Sastrawi """
-    if nlp is None:
-        return ["[ERROR] Model SpaCy tidak tersedia"]
-    
+    """ Ekstraksi kata kunci menggunakan tokenisasi NLTK + stemming Sastrawi """
     teks_bersih = bersihkan_teks(teks)
-    doc = nlp(teks_bersih)
+    tokens = word_tokenize(teks_bersih)
     
     kata_kunci = set()
-    for token in doc:
-        if token.is_stop or token.is_punct:
-            continue
-        kata_stem = stemmer.stem(token.text)
-        kata_kunci.add(kata_stem)
+    for token in tokens:
+        kata_stem = stemmer.stem(token)  # Stemming bahasa Indonesia
+        if len(kata_stem) > 3:  # Filter kata pendek biar lebih relevan
+            kata_kunci.add(kata_stem)
 
     return list(kata_kunci)
 
@@ -65,5 +54,3 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
         st.write(kutipan if kutipan else "Tidak ada kutipan ditemukan.")
     else:
         st.warning("Masukkan teks terlebih dahulu!")
-
-st.info(spacy_status)
