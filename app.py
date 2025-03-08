@@ -20,16 +20,9 @@ def load_spacy_model():
         nlp = spacy.load(MODEL_NAME)
         return nlp
 
-# Panggil fungsi buat load model
+# ✅ Load model SpaCy sekali aja di sini
 nlp = load_spacy_model()
-
-# ✅ Load model SpaCy IndoNLP
-try:
-    nlp = spacy.load(MODEL_PATH)
-    spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!"
-except OSError:
-    nlp = None
-    spacy_status = "❌ Model SpaCy tidak ditemukan!"
+spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!" if nlp else "❌ Model SpaCy tidak ditemukan!"
 
 # ✅ Inisialisasi stemmer Sastrawi
 factory = StemmerFactory()
