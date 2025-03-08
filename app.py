@@ -9,8 +9,19 @@ st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 
 # ✅ Cek & install SpaCy model jika belum ada
 MODEL_PATH = "id_core_news_sm"
-if not os.path.exists(spacy.util.get_model_path(MODEL_PATH)):
+
+# ✅ Cek apakah model sudah ada sebelum dipanggil
+try:
+    nlp = spacy.load(MODEL_PATH)
+    spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!"
+except OSError:
     os.system(f"python -m spacy download {MODEL_PATH}")
+    try:
+        nlp = spacy.load(MODEL_PATH)
+        spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat setelah instalasi!"
+    except OSError:
+        nlp = None
+        spacy_status = "❌ Model SpaCy gagal diinstal!"
 
 # ✅ Load model SpaCy IndoNLP
 try:
