@@ -1,29 +1,21 @@
 import streamlit as st
 import re
 import spacy
-import os
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 
-# ✅ Cek & install SpaCy model jika belum ada
-import spacy
+# ✅ Pakai model universal yang sudah ada di Streamlit Cloud
+MODEL_NAME = "xx_ent_wiki_sm"
 
-MODEL_NAME = "id_core_news_sm"
-
-def load_spacy_model():
-    try:
-        nlp = spacy.load(MODEL_NAME)
-        return nlp
-    except OSError:
-        import subprocess
-        subprocess.run(["python", "-m", "spacy", "download", MODEL_NAME], check=True)
-        nlp = spacy.load(MODEL_NAME)
-        return nlp
-
-nlp = load_spacy_model()
-
+# ✅ Load model tanpa install tambahan
+try:
+    nlp = spacy.load(MODEL_NAME)
+    spacy_status = f"✅ Model SpaCy {MODEL_NAME} berhasil dimuat!"
+except OSError:
+    nlp = None
+    spacy_status = f"❌ Model SpaCy {MODEL_NAME} tidak ditemukan!"
 
 # ✅ Inisialisasi stemmer Sastrawi
 factory = StemmerFactory()
@@ -38,7 +30,7 @@ def bersihkan_teks(teks):
 def ekstrak_kata_kunci(teks):
     """ Ekstraksi kata kunci menggunakan tokenisasi SpaCy + stemming Sastrawi """
     if nlp is None:
-        return ["[ERROR] Model spaCy belum terinstal"]
+        return ["[ERROR] Model SpaCy tidak tersedia"]
     
     teks_bersih = bersihkan_teks(teks)
     doc = nlp(teks_bersih)
