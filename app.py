@@ -8,6 +8,8 @@ st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 
 # ✅ Cek & install SpaCy model jika belum ada
+import spacy
+
 MODEL_NAME = "id_core_news_sm"
 
 def load_spacy_model():
@@ -15,14 +17,13 @@ def load_spacy_model():
         nlp = spacy.load(MODEL_NAME)
         return nlp
     except OSError:
-        from spacy.cli import download
-        download(MODEL_NAME)  # Auto-download kalau model ga ada
+        import subprocess
+        subprocess.run(["python", "-m", "spacy", "download", MODEL_NAME], check=True)
         nlp = spacy.load(MODEL_NAME)
         return nlp
 
-# ✅ Load model SpaCy sekali aja di sini
 nlp = load_spacy_model()
-spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!" if nlp else "❌ Model SpaCy tidak ditemukan!"
+
 
 # ✅ Inisialisasi stemmer Sastrawi
 factory = StemmerFactory()
