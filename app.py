@@ -8,20 +8,20 @@ st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 
 # ✅ Cek & install SpaCy model jika belum ada
-MODEL_PATH = "id_core_news_sm"
+MODEL_NAME = "id_core_news_sm"
 
-# ✅ Cek apakah model sudah ada sebelum dipanggil
-try:
-    nlp = spacy.load(MODEL_PATH)
-    spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!"
-except OSError:
-    os.system(f"python -m spacy download {MODEL_PATH}")
+def load_spacy_model():
     try:
-        nlp = spacy.load(MODEL_PATH)
-        spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat setelah instalasi!"
+        nlp = spacy.load(MODEL_NAME)
+        return nlp
     except OSError:
-        nlp = None
-        spacy_status = "❌ Model SpaCy gagal diinstal!"
+        from spacy.cli import download
+        download(MODEL_NAME)  # Auto-download kalau model ga ada
+        nlp = spacy.load(MODEL_NAME)
+        return nlp
+
+# Panggil fungsi buat load model
+nlp = load_spacy_model()
 
 # ✅ Load model SpaCy IndoNLP
 try:
