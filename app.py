@@ -1,20 +1,26 @@
 import streamlit as st
 import re
 import spacy
+import os
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 
-# Load model SpaCy IndoNLP (pastikan sudah di-download)
+# ✅ Cek & install SpaCy model jika belum ada
+MODEL_PATH = "id_core_news_sm"
+if not os.path.exists(spacy.util.get_model_path(MODEL_PATH)):
+    os.system(f"python -m spacy download {MODEL_PATH}")
+
+# ✅ Load model SpaCy IndoNLP
 try:
-    nlp = spacy.load("id_core_news_sm")
+    nlp = spacy.load(MODEL_PATH)
     spacy_status = "✅ Model SpaCy IndoNLP berhasil dimuat!"
 except OSError:
     nlp = None
     spacy_status = "❌ Model SpaCy tidak ditemukan!"
 
-# Inisialisasi stemmer Sastrawi
+# ✅ Inisialisasi stemmer Sastrawi
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
@@ -42,11 +48,11 @@ def ekstrak_kata_kunci(teks):
     return list(kata_kunci)
 
 def ekstrak_kutipan(teks):
-    """ Ekstrak kutipan dari teks menggunakan regex """
-    kutipan = re.findall(r'"(.*?)"', teks)
-    return kutipan
+    """ ✅ Perbaiki regex agar kutipan tidak kepotong """
+    kutipan = re.findall(r'(["“][^"”]+["”])', teks)
+    return [k.replace("“", '"').replace("”", '"') for k in kutipan]
 
-# Input dari user
+# ✅ Input dari user
 st.subheader("📝 Input Siaran Pers")
 input_teks = st.text_area("Masukkan teks siaran pers di sini:")
 
