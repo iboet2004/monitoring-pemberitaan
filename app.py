@@ -4,7 +4,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
-# ✅ Download NLTK tokenizer (cuma pertama kali)
+# ✅ Download model tokenisasi NLTK (cuma pertama kali)
 nltk.download("punkt")
 
 st.title("Monitoring Pemberitaan")
@@ -23,6 +23,7 @@ def bersihkan_teks(teks):
 def ekstrak_kata_kunci(teks):
     """ Ekstraksi kata kunci menggunakan tokenisasi NLTK + stemming Sastrawi """
     teks_bersih = bersihkan_teks(teks)
+    nltk.download("punkt")  # ✅ FIX: Pastikan model sudah ada
     tokens = word_tokenize(teks_bersih)
     
     kata_kunci = set()
