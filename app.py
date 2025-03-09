@@ -2,47 +2,46 @@ import streamlit as st
 import pandas as pd
 import re
 import nltk
-from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from nltk.corpus import stopwords
 
-# Pastikan stopwords tersedia
-nltk.download('stopwords')
-id_stopwords = set(stopwords.words('indonesian'))
+# Download stopwords
+nltk.download("punkt")
+nltk.download("stopwords")
 
-# Inisialisasi Stemmer Sastrawi
+# Inisialisasi stemmer
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
+# Stopwords tambahan untuk filtering
+custom_stopwords = set(stopwords.words("indonesian"))
+custom_stopwords.update({"guna", "dalam", "akan", "dan", "untuk", "yang", "dengan", "ini", "itu", "pada"})
+
 def extract_keywords(text):
-    words = re.findall(r'\b[a-zA-Z]{3,}\b', text.lower())  # Ambil kata minimal 3 huruf
-    filtered_words = [word for word in words if word not in id_stopwords]  # Hapus stopwords
-    stemmed_words = [stemmer.stem(word) for word in filtered_words]  # Stemming
-    unique_keywords = list(set(stemmed_words))  # Hilangkan duplikasi
-    return unique_keywords
+    words = word_tokenize(text.lower())
+    words = [stemmer.stem(word) for word in words if word.isalnum() and word not in custom_stopwords]
+    return list(set(words))  # Hilangkan duplikasi
 
 def extract_quotes(text):
-    quotes = re.findall(r'\"(.*?)\"', text)  # Ambil teks dalam tanda kutip
+    quotes = re.findall(r'\"(.*?)\"', text)
     return quotes
 
-# Load siaran pers dari user
+# UI Streamlit
 st.title("🔎 Ekstraksi Kata Kunci & Kutipan")
-uploaded_file = st.file_uploader("Upload Siaran Pers (TXT)", type=["txt"])
+uploaded_file = st.file_uploader("Upload Siaran Pers (.txt)", type=["txt"])
 
 if uploaded_file is not None:
-    text = uploaded_file.read().decode("utf-8")
+    raw_text = uploaded_file.read().decode("utf-8")
+    keywords = extract_keywords(raw_text)
+    quotes = extract_quotes(raw_text)
     
-    # Ekstraksi kata kunci dan kutipan
-    keywords = extract_keywords(text)
-    quotes = extract_quotes(text)
-    
-    # Tampilkan hasil
-    st.markdown("### 🟡 Kata Kunci yang Ditemukan")
+    st.subheader("🔑 Kata Kunci yang Ditemukan")
     st.write(", ".join(keywords))
     
-    st.markdown("### 💬 Kutipan yang Ditemukan")
+    st.subheader("💬 Kutipan yang Ditemukan")
     for idx, quote in enumerate(quotes):
         st.write(f"{idx+1}. {quote}")
     
     # Atribusi
-    st.markdown("---")
-    st.markdown("**🔍 Sumber:** Algoritma NLP dengan NLTK & Sastrawi")
+    st.markdown("**Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi) & [NLTK](https://www.nltk.org/)")
