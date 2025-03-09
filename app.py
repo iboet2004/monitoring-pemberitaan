@@ -1,11 +1,6 @@
 import streamlit as st
 import re
-import nltk
-from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-
-# ✅ Download model tokenisasi NLTK (cuma pertama kali)
-nltk.download("punkt")
 
 st.title("Monitoring Pemberitaan")
 st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
@@ -21,10 +16,11 @@ def bersihkan_teks(teks):
     return teks
 
 def ekstrak_kata_kunci(teks):
-    """ Ekstraksi kata kunci menggunakan tokenisasi NLTK + stemming Sastrawi """
+    """ Ekstraksi kata kunci menggunakan regex tokenization + stemming Sastrawi """
     teks_bersih = bersihkan_teks(teks)
-    nltk.download("punkt")  # ✅ FIX: Pastikan model sudah ada
-    tokens = word_tokenize(teks_bersih)
+    
+    # ✅ Gunakan regex untuk tokenisasi, bukan NLTK
+    tokens = re.split(r'\s+', teks_bersih)  # Pecah teks berdasarkan spasi
     
     kata_kunci = set()
     for token in tokens:
