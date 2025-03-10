@@ -10,11 +10,12 @@ st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-# ✅ Daftar stopwords bahasa Indonesia
+# ✅ Daftar stopwords bahasa Indonesia yang diperluas
 STOPWORDS = set([
     "yang", "dan", "di", "dengan", "ke", "dalam", "untuk", "atau", "kami",
     "kita", "ini", "itu", "pada", "adalah", "dari", "sebagai", "akan", "juga",
-    "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi"
+    "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi",
+    "guna", "melalui", "sehingga", "lebih", "terhadap", "serta", "oleh", "perlu"
 ])
 
 def bersihkan_teks(teks):
@@ -24,7 +25,7 @@ def bersihkan_teks(teks):
     return teks
 
 def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
-    """ Ekstraksi kata kunci dengan filter stopwords dan panjang kata """
+    """ Ekstraksi kata kunci dengan filter stopwords, stemming, dan panjang kata """
     teks_bersih = bersihkan_teks(teks)
     
     # ✅ Gunakan regex untuk tokenisasi
@@ -43,9 +44,16 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
     return kata_terpilih
 
 def ekstrak_kutipan(teks):
-    """ ✅ Perbaiki regex agar kutipan tidak kepotong """
-    kutipan = re.findall(r'(["“][^"”]+["”])', teks)
-    return [k.replace("“", '"').replace("”", '"') for k in kutipan]
+    """ ✅ Perbaiki regex agar kutipan tidak kepotong dan ambil atribusi narasumber """
+    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata)\s*([A-Za-z\s]+))?', teks)
+    kutipan_final = []
+    
+    for match in kutipan_matches:
+        kutipan_teks = match[1]
+        narasumber = match[3] if match[3] else "Tidak Diketahui"
+        kutipan_final.append({"kutipan": kutipan_teks, "narasumber": narasumber})
+    
+    return kutipan_final
 
 # ✅ Input dari user
 st.subheader("📝 Input Siaran Pers")
@@ -60,6 +68,12 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
         st.write(", ".join(kata_kunci) if kata_kunci else "Tidak ada kata kunci ditemukan.")
 
         st.subheader("💬 Kutipan yang Ditemukan")
-        st.write(kutipan if kutipan else "Tidak ada kutipan ditemukan.")
+        for item in kutipan:
+            st.write(f"\"{item['kutipan']}\" - {item['narasumber']}")
+        
     else:
         st.warning("Masukkan teks terlebih dahulu!")
+
+# ✅ Tambahkan atribusi
+st.markdown("---")
+st.markdown("**🔍 Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi)")
