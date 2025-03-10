@@ -14,9 +14,9 @@ stemmer = factory.create_stemmer()
 
 # ✅ Daftar stopwords bahasa Indonesia yang diperluas
 STOPWORDS = set([
-    "yang", "dan", "di", "dengan", "ke", "dalam", "untuk", "atau", "kami",
-    "kita", "ini", "itu", "pada", "adalah", "dari", "sebagai", "akan", "juga",
-    "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi",
+    "yang", "dan", "di", "dengan", "ke", "dalam", "untuk", "atau", "kami","bagai","hingga","yakin","sendiri","mungkin","dukung","hanya","tempat",
+    "kita", "ini", "itu", "pada", "adalah", "dari", "sebagai", "akan", "juga","pasti", "harap","sendiri","dukung","masuk", "jelas","upaya","tetapi",
+    "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi","butuh","langkah","sangat","penting","lanjut",
     "guna", "melalui", "sehingga", "lebih", "terhadap", "serta", "oleh", "perlu"
 ])
 
