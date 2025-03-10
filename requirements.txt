@@ -1,5 +1,2 @@
 streamlit
 sastrawi
-wordcloud
-matplotlib
-spacy
