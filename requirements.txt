@@ -1,10 +1,4 @@
 streamlit
-pandas
-plotly
-wordcloud
-nltk
 sastrawi
-whoosh
-re
-matplotlib.pyplot
 wordcloud
+matplotlib
