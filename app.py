@@ -72,7 +72,6 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
             colormap='plasma',
             contour_width=3, contour_color='white',
             relative_scaling=0.4,
-            font_path='arial.ttf'
         ).generate_from_frequencies(kata_kunci)
         
         fig, ax = plt.subplots(figsize=(10, 5))
