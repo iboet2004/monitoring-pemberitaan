@@ -5,3 +5,6 @@ wordcloud
 nltk
 sastrawi
 whoosh
+re
+matplotlib.pyplot
+wordcloud
