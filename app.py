@@ -45,3 +45,19 @@ if uploaded_file is not None:
     
     # Atribusi
     st.markdown("**Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi) & [NLTK](https://www.nltk.org/)")
+
+input_teks = st.text_area("Masukkan teks siaran pers di sini:")
+
+if st.button("Ekstrak Kata Kunci & Kutipan"):
+    if input_teks:
+        kata_kunci = ekstrak_kata_kunci(input_teks)
+        kutipan = ekstrak_kutipan(input_teks)
+        
+        st.subheader("🔑 Kata Kunci yang Ditemukan")
+        st.write(", ".join(kata_kunci) if kata_kunci else "Tidak ada kata kunci ditemukan.")
+
+        st.subheader("💬 Kutipan yang Ditemukan")
+        st.write(kutipan if kutipan else "Tidak ada kutipan ditemukan.")
+    else:
+        st.warning("Masukkan teks terlebih dahulu!")
+
