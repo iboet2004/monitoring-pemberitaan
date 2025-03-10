@@ -1,69 +1,36 @@
-import streamlit as st
 import re
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
-from collections import Counter
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+import spacy
+import streamlit as st
 
-st.title("Monitoring Pemberitaan")
-st.write("🚀 Selamat datang di dashboard monitoring pemberitaan!")
+# ✅ Load model bahasa Indonesia (pastikan sudah install)
+nlp = spacy.load("xx_ent_wiki_sm")  # Model multilingual dengan NER
 
-# ✅ Inisialisasi stemmer Sastrawi
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
+def ekstrak_narasumber(teks):
+    """ Menggunakan spaCy untuk ekstrak nama orang dari teks """
+    doc = nlp(teks)
+    narasumber = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+    return list(set(narasumber))  # Hapus duplikasi
 
-# ✅ Daftar stopwords bahasa Indonesia yang diperluas
-STOPWORDS = set([
-    "yang", "dan", "di", "dengan", "ke", "dalam", "untuk", "atau", "kami",
-    "kita", "ini", "itu", "pada", "adalah", "dari", "sebagai", "akan", "juga",
-    "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi",
-    "guna", "melalui", "sehingga", "lebih", "terhadap", "serta", "oleh", "perlu"
-])
+def ekstrak_kutipan_dengan_narasumber(teks):
+    """ Ekstrak kutipan lalu cocokan dengan narasumber terdekat """
+    kutipan_regex = re.findall(r'[“"]([^“”]+)[”"]', teks)
+    narasumber_list = ekstrak_narasumber(teks)
 
-def bersihkan_teks(teks):
-    """ Membersihkan teks dari karakter khusus & angka """
-    teks = teks.lower()
-    teks = re.sub(r'[^a-zA-Z\s]', '', teks)
-    return teks
-
-def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
-    """ Ekstraksi kata kunci dengan filter stopwords, stemming, dan panjang kata """
-    teks_bersih = bersihkan_teks(teks)
-    
-    # ✅ Gunakan regex untuk tokenisasi
-    tokens = re.split(r'\s+', teks_bersih)  
-
-    kata_kunci = []
-    for token in tokens:
-        kata_stem = stemmer.stem(token)  # Stemming bahasa Indonesia
-        if len(kata_stem) >= min_panjang and kata_stem not in STOPWORDS:
-            kata_kunci.append(kata_stem)
-
-    # ✅ Hitung frekuensi kata dan ambil yang muncul lebih dari min_frekuensi
-    kata_counter = Counter(kata_kunci)
-    return kata_counter
-
-def ekstrak_kutipan(teks):
-    """ ✅ Menangkap kutipan dengan atribusi sebelum atau setelah kutipan """
-    kutipan_matches = re.findall(
-        r'(?:([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s*[,:]?\s*)?[“"]([^“”]+)[”"]\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)?', 
-        teks
-    )
-    
     kutipan_final = []
-    
-    for i, match in enumerate(kutipan_matches):
-        narasumber_sebelum = match[0]  # Nama sebelum kutipan
-        kutipan_teks = match[1]  # Isi kutipan
-        narasumber_setelah = match[2]  # Nama setelah kutipan
-        
-        # Pilih narasumber yang valid (jika ada)
-        narasumber = narasumber_sebelum or narasumber_setelah or "Tidak Diketahui"
-        
-        kutipan_final.append(f"{i+1}. \"{kutipan_teks}\" - {narasumber}")
-    
-    return kutipan_final
+    for i, kutipan in enumerate(kutipan_regex):
+        # Cari narasumber terdekat sebelum atau setelah kutipan
+        before_match = re.search(r'([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s*(?:ujar|kata|menurut|tambah|jelas|ungkap|papar|sebut|tegas|tandas)', teks)
+        after_match = re.search(r'[“"]' + re.escape(kutipan) + r'[”"]\s*(?:ujar|kata|menurut|tambah|jelas|ungkap|papar|sebut|tegas|tandas)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)', teks)
 
+        narasumber = after_match.group(1) if after_match else (before_match.group(1) if before_match else "Tidak Diketahui")
+
+        # Jika narasumber terdeteksi oleh spaCy tapi tidak oleh regex
+        if narasumber == "Tidak Diketahui" and narasumber_list:
+            narasumber = narasumber_list[0]  # Ambil kandidat pertama
+
+        kutipan_final.append(f"{i+1}. \"{kutipan}\" - {narasumber}")
+
+    return kutipan_final
 
 # ✅ Input dari user
 st.subheader("📝 Input Siaran Pers")
@@ -71,23 +38,7 @@ input_teks = st.text_area("Masukkan teks siaran pers di sini:")
 
 if st.button("Ekstrak Kata Kunci & Kutipan"):
     if input_teks:
-        kata_kunci = ekstrak_kata_kunci(input_teks)
-        kutipan = ekstrak_kutipan(input_teks)
-        
-        # ✅ Word Cloud untuk Kata Kunci
-        st.subheader("🔑 Word Cloud Kata Kunci")
-        wordcloud = WordCloud(
-            width=800, height=400,
-            background_color='black',
-            colormap='plasma',
-            contour_width=3, contour_color='white',
-            relative_scaling=0.4,
-        ).generate_from_frequencies(kata_kunci)
-        
-        fig, ax = plt.subplots(figsize=(10, 5))
-        ax.imshow(wordcloud, interpolation='bilinear')
-        ax.axis("off")
-        st.pyplot(fig)
+        kutipan = ekstrak_kutipan_dengan_narasumber(input_teks)
 
         # ✅ Kutipan dalam format pointer bernomor
         st.subheader("💬 Kutipan yang Ditemukan")
@@ -97,6 +48,3 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
     else:
         st.warning("Masukkan teks terlebih dahulu!")
 
-# ✅ Tambahkan atribusi
-st.markdown("---")
-st.markdown("**🔍 Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi) & WordCloud")
