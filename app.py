@@ -1,5 +1,7 @@
 import streamlit as st
 import re
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 from collections import Counter
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
@@ -39,9 +41,7 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
 
     # ✅ Hitung frekuensi kata dan ambil yang muncul lebih dari min_frekuensi
     kata_counter = Counter(kata_kunci)
-    kata_terpilih = [k for k, v in kata_counter.items() if v >= min_frekuensi]
-
-    return kata_terpilih
+    return kata_counter
 
 def ekstrak_kutipan(teks):
     """ ✅ Perbaiki regex agar kutipan tidak kepotong dan ambil atribusi narasumber """
@@ -64,16 +64,31 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
         kata_kunci = ekstrak_kata_kunci(input_teks)
         kutipan = ekstrak_kutipan(input_teks)
         
-        st.subheader("🔑 Kata Kunci yang Ditemukan")
-        st.write(", ".join(kata_kunci) if kata_kunci else "Tidak ada kata kunci ditemukan.")
+        # ✅ Word Cloud untuk Kata Kunci
+        st.subheader("🔑 Word Cloud Kata Kunci")
+        wordcloud = WordCloud(
+            width=800, height=400,
+            background_color='white',
+            colormap='coolwarm',
+            contour_width=2, contour_color='steelblue',
+            font_path='arial.ttf',  # Ganti dengan font yang lebih modern jika perlu
+            relative_scaling=0.5
+        ).generate_from_frequencies(kata_kunci)
+        
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
 
+        # ✅ Kutipan dalam format pointer
         st.subheader("💬 Kutipan yang Ditemukan")
         for item in kutipan:
-            st.write(f"\"{item['kutipan']}\" - {item['narasumber']}")
+            st.markdown(f"**{item['narasumber']}**")
+            st.write(f"• {item['kutipan']}")
         
     else:
         st.warning("Masukkan teks terlebih dahulu!")
 
 # ✅ Tambahkan atribusi
 st.markdown("---")
-st.markdown("**🔍 Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi)")
+st.markdown("**🔍 Ditenagai oleh:** [Sastrawi](https://github.com/har07/PySastrawi) & WordCloud")
