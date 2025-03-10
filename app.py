@@ -71,7 +71,6 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
             background_color='white',
             colormap='coolwarm',
             contour_width=2, contour_color='steelblue',
-            font_path='arial.ttf',  # Ganti dengan font yang lebih modern jika perlu
             relative_scaling=0.5
         ).generate_from_frequencies(kata_kunci)
         
