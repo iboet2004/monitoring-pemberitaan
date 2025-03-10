@@ -78,7 +78,7 @@ input_teks = st.text_area("Masukkan teks siaran pers di sini:")
 if st.button("Ekstrak Kata Kunci & Kutipan"):
     if input_teks:
         kata_kunci = ekstrak_kata_kunci(input_teks)
-        kutipan = ekstrak_kutipan(input_teks)
+        kutipan = ekstrak_kutipan_dengan_narasumber(input_teks)
         
         # ✅ Word Cloud untuk Kata Kunci
         st.subheader("🔑 Word Cloud Kata Kunci")
