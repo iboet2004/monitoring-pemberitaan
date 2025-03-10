@@ -44,16 +44,26 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
     return kata_counter
 
 def ekstrak_kutipan(teks):
-    """ ✅ Perbaiki regex agar kutipan tidak kepotong dan atribusi lebih akurat """
-    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata|menurut)\s+([^,.]+))', teks)
+    """ ✅ Menangkap kutipan dengan atribusi sebelum atau setelah kutipan """
+    kutipan_matches = re.findall(
+        r'(?:([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s*[,:]?\s*)?[“"]([^“”]+)[”"]\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)?', 
+        teks
+    )
+    
     kutipan_final = []
     
     for i, match in enumerate(kutipan_matches):
-        kutipan_teks = match[1]
-        narasumber = match[3] if match[3] and not match[3].endswith(('nya', 'itu', 'tersebut')) else "Tidak Diketahui"
+        narasumber_sebelum = match[0]  # Nama sebelum kutipan
+        kutipan_teks = match[1]  # Isi kutipan
+        narasumber_setelah = match[2]  # Nama setelah kutipan
+        
+        # Pilih narasumber yang valid (jika ada)
+        narasumber = narasumber_sebelum or narasumber_setelah or "Tidak Diketahui"
+        
         kutipan_final.append(f"{i+1}. \"{kutipan_teks}\" - {narasumber}")
     
     return kutipan_final
+
 
 # ✅ Input dari user
 st.subheader("📝 Input Siaran Pers")
