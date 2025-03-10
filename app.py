@@ -45,12 +45,12 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
 
 def ekstrak_kutipan(teks):
     """ ✅ Perbaiki regex agar kutipan tidak kepotong dan atribusi lebih akurat """
-    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata)\s*(.*?)(?:,|\.))', teks)
+    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata|menurut)\s+([^,.]+))', teks)
     kutipan_final = []
     
     for i, match in enumerate(kutipan_matches):
         kutipan_teks = match[1]
-        narasumber = match[3] if match[3] else "Tidak Diketahui"
+        narasumber = match[3] if match[3] and not match[3].endswith(('nya', 'itu', 'tersebut')) else "Tidak Diketahui"
         kutipan_final.append(f"{i+1}. \"{kutipan_teks}\" - {narasumber}")
     
     return kutipan_final
@@ -68,10 +68,11 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
         st.subheader("🔑 Word Cloud Kata Kunci")
         wordcloud = WordCloud(
             width=800, height=400,
-            background_color='white',
-            colormap='coolwarm',
-            contour_width=2, contour_color='steelblue',
-            relative_scaling=0.5
+            background_color='black',
+            colormap='plasma',
+            contour_width=3, contour_color='white',
+            relative_scaling=0.4,
+            font_path='arial.ttf'
         ).generate_from_frequencies(kata_kunci)
         
         fig, ax = plt.subplots(figsize=(10, 5))
