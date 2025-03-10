@@ -17,7 +17,7 @@ STOPWORDS = set([
     "yang", "dan", "di", "dengan", "ke", "dalam", "untuk", "atau", "kami","bagai","hingga","yakin","sendiri","mungkin","dukung","hanya","tempat",
     "kita", "ini", "itu", "pada", "adalah", "dari", "sebagai", "akan", "juga","pasti", "harap","sendiri","dukung","masuk", "jelas","upaya","tetapi",
     "telah", "agar", "maupun", "bagi", "tersebut", "dapat", "bahwa", "demi","butuh","langkah","sangat","penting","lanjut",
-    "guna", "melalui", "sehingga", "lebih", "terhadap", "serta", "oleh", "perlu"
+    "guna", "melalui", "sehingga", "lebih", "terhadap", "serta", "oleh", "perlu"
 ])
 
 def bersihkan_teks(teks):
@@ -44,14 +44,14 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
     return kata_counter
 
 def ekstrak_kutipan(teks):
-    """ ✅ Perbaiki regex agar kutipan tidak kepotong dan ambil atribusi narasumber """
-    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata)\s*([A-Za-z\s]+))?', teks)
+    """ ✅ Perbaiki regex agar kutipan tidak kepotong dan atribusi lebih akurat """
+    kutipan_matches = re.findall(r'([“"])(.*?)([”"])(?:\s*(?:ujar|tambah|jelas|kata)\s*(.*?)(?:,|\.))', teks)
     kutipan_final = []
     
-    for match in kutipan_matches:
+    for i, match in enumerate(kutipan_matches):
         kutipan_teks = match[1]
         narasumber = match[3] if match[3] else "Tidak Diketahui"
-        kutipan_final.append({"kutipan": kutipan_teks, "narasumber": narasumber})
+        kutipan_final.append(f"{i+1}. \"{kutipan_teks}\" - {narasumber}")
     
     return kutipan_final
 
@@ -79,11 +79,10 @@ if st.button("Ekstrak Kata Kunci & Kutipan"):
         ax.axis("off")
         st.pyplot(fig)
 
-        # ✅ Kutipan dalam format pointer
+        # ✅ Kutipan dalam format pointer bernomor
         st.subheader("💬 Kutipan yang Ditemukan")
         for item in kutipan:
-            st.markdown(f"**{item['narasumber']}**")
-            st.write(f"• {item['kutipan']}")
+            st.write(item)
         
     else:
         st.warning("Masukkan teks terlebih dahulu!")
