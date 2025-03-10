@@ -43,25 +43,31 @@ def ekstrak_kata_kunci(teks, min_panjang=5, min_frekuensi=2):
     kata_counter = Counter(kata_kunci)
     return kata_counter
 
-def ekstrak_kutipan(teks):
-    """ ✅ Menangkap kutipan dengan atribusi sebelum atau setelah kutipan """
-    kutipan_matches = re.findall(
-        r'(?:([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s*[,:]?\s*)?[“"]([^“”]+)[”"]\s*(?:ujar|tambah|jelas|kata|menurut|menambahkan|ungkap|papar|sebut|tegas|tandas)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)?', 
-        teks
-    )
+def ekstrak_kutipan_dengan_narasumber(teks):
+    """ Ekstrak kutipan & narasumber dengan regex full tanpa spaCy """
+    
+    # Pola regex: tangkap kutipan dan cari narasumber sebelum/sesudahnya
+    pola_kutipan = r'([“"][^“”]+[”"])'
+    pola_narasumber = r'([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s*(?:ujar|kata|menurut|tambah|jelas|ungkap|papar|sebut|tegas|tandas)'
+
+    # Temukan semua kutipan dalam teks
+    kutipan_ditemukan = re.findall(pola_kutipan, teks)
     
     kutipan_final = []
-    
-    for i, match in enumerate(kutipan_matches):
-        narasumber_sebelum = match[0]  # Nama sebelum kutipan
-        kutipan_teks = match[1]  # Isi kutipan
-        narasumber_setelah = match[2]  # Nama setelah kutipan
-        
-        # Pilih narasumber yang valid (jika ada)
-        narasumber = narasumber_sebelum or narasumber_setelah or "Tidak Diketahui"
-        
-        kutipan_final.append(f"{i+1}. \"{kutipan_teks}\" - {narasumber}")
-    
+    for kutipan in kutipan_ditemukan:
+        # Cari narasumber sebelum atau setelah kutipan
+        before_match = re.search(r'(' + pola_narasumber + r')\s*' + re.escape(kutipan), teks)
+        after_match = re.search(re.escape(kutipan) + r'\s*' + pola_narasumber, teks)
+
+        if after_match:
+            narasumber = after_match.group(1)
+        elif before_match:
+            narasumber = before_match.group(1)
+        else:
+            narasumber = "Tidak Diketahui"
+
+        kutipan_final.append(f"{kutipan} - {narasumber}")
+
     return kutipan_final
 
 
